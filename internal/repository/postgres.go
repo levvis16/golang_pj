@@ -158,6 +158,21 @@ func (r *SubscriptionRepository) GetTotalCost(filter *models.SubscriptionFilter)
 		argCount++
 	}
 
+	if filter.StartMonth != "" {
+		startDate, _ := time.Parse("01-2006", filter.StartMonth)
+		query += fmt.Sprintf(" AND start_date >= $%d", argCount)
+		args = append(args, startDate)
+		argCount++
+	}
+
+	if filter.EndMonth != "" {
+		endDate, _ := time.Parse("01-2006", filter.EndMonth)
+		endDate = endDate.AddDate(0, 1, -1)
+		query += fmt.Sprintf(" AND start_date <= $%d", argCount)
+		args = append(args, endDate)
+		argCount++
+	}
+
 	var total int
 	err := r.db.QueryRow(query, args...).Scan(&total)
 	return total, err
