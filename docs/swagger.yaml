@@ -1,0 +1,196 @@
+openapi: 3.0.0
+info:
+  title: Subscription Service API
+  description: REST API for managing user subscriptions
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local server
+
+paths:
+  /subscriptions:
+    post:
+      summary: Create a new subscription
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSubscriptionRequest'
+      responses:
+        '201':
+          description: Subscription created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '400':
+          description: Invalid request
+
+    get:
+      summary: List all subscriptions
+      parameters:
+        - in: query
+          name: user_id
+          schema:
+            type: string
+          description: Filter by user ID
+        - in: query
+          name: service_name
+          schema:
+            type: string
+          description: Filter by service name
+      responses:
+        '200':
+          description: List of subscriptions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Subscription'
+
+  /subscriptions/total:
+    get:
+      summary: Get total cost of subscriptions
+      parameters:
+        - in: query
+          name: user_id
+          schema:
+            type: string
+          description: Filter by user ID
+        - in: query
+          name: service_name
+          schema:
+            type: string
+          description: Filter by service name
+      responses:
+        '200':
+          description: Total cost
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+
+  /subscriptions/{id}:
+    get:
+      summary: Get subscription by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Subscription found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '404':
+          description: Subscription not found
+
+    put:
+      summary: Update subscription
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSubscriptionRequest'
+      responses:
+        '200':
+          description: Subscription updated
+        '404':
+          description: Subscription not found
+
+    delete:
+      summary: Delete subscription
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Subscription deleted
+
+components:
+  schemas:
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        service_name:
+          type: string
+        price:
+          type: integer
+        user_id:
+          type: string
+          format: uuid
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CreateSubscriptionRequest:
+      type: object
+      required:
+        - service_name
+        - price
+        - user_id
+        - start_date
+      properties:
+        service_name:
+          type: string
+          example: "Yandex Plus"
+        price:
+          type: integer
+          minimum: 0
+          example: 400
+        user_id:
+          type: string
+          format: uuid
+          example: "60601fee-2bf1-4721-ae6f-7636e79a0cba"
+        start_date:
+          type: string
+          example: "07-2025"
+        end_date:
+          type: string
+          example: "07-2026"
+
+    UpdateSubscriptionRequest:
+      type: object
+      properties:
+        service_name:
+          type: string
+        price:
+          type: integer
+        start_date:
+          type: string
+        end_date:
+          type: string
+          nullable: true
